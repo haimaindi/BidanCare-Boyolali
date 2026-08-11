@@ -175,7 +175,7 @@ export function Sidebar({ isOpenMobile, isCollapsed, activeModule, onNavigate }:
                   title={isCollapsed ? "Laporan Keuangan" : undefined}
                 >
                   <DollarSign className="h-[1.25rem] w-[1.25rem] shrink-0" />
-                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Domain Keuangan</span>
+                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Keuangan</span>
                 </a>
                 <a
                   href="#"
@@ -190,7 +190,7 @@ export function Sidebar({ isOpenMobile, isCollapsed, activeModule, onNavigate }:
                   title={isCollapsed ? "Laporan Data Pasien" : undefined}
                 >
                   <Users2 className="h-[1.25rem] w-[1.25rem] shrink-0" />
-                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Domain Data Pasien</span>
+                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Pasien</span>
                 </a>
                 <a
                   href="#"
@@ -205,7 +205,7 @@ export function Sidebar({ isOpenMobile, isCollapsed, activeModule, onNavigate }:
                   title={isCollapsed ? "Laporan Obat & BHP" : undefined}
                 >
                   <Layers className="h-[1.25rem] w-[1.25rem] shrink-0" />
-                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Domain Obat & BHP</span>
+                  <span className={cn(isCollapsed ? "lg:hidden" : "block")}>Obat & BHP</span>
                 </a>
               </div>
             )}
