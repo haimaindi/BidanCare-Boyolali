@@ -346,11 +346,11 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
   // Modal States
   const [isObatModalOpen, setIsObatModalOpen] = useState(false);
   const [editingObatIndex, setEditingObatIndex] = useState<number | null>(null);
-  const [currentObat, setCurrentObat] = useState({ sku: "", namaObat: "", dosis: "", aturanPakai: "", jumlah: 1 });
+  const [currentObat, setCurrentObat] = useState({ sku: "", namaObat: "", dosis: "", aturanPakai: "", jumlah: 1, harga: 0 });
 
   const [isBhpModalOpen, setIsBhpModalOpen] = useState(false);
   const [editingBhpIndex, setEditingBhpIndex] = useState<number | null>(null);
-  const [currentBhp, setCurrentBhp] = useState({ sku: "", namaBhp: "", jumlah: 1, satuan: "" });
+  const [currentBhp, setCurrentBhp] = useState({ sku: "", namaBhp: "", jumlah: 1, satuan: "", harga: 0 });
 
   const [isLayananModalOpen, setIsLayananModalOpen] = useState(false);
   const [editingLayananIndex, setEditingLayananIndex] = useState<number | null>(null);
@@ -395,7 +395,7 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
       setCurrentObat(formData.plan!.terapiFarmakologi[index]);
     } else {
       setEditingObatIndex(null);
-      setCurrentObat({ sku: "", namaObat: "", dosis: "", aturanPakai: "", jumlah: 1 });
+      setCurrentObat({ sku: "", namaObat: "", dosis: "", aturanPakai: "", jumlah: 1, harga: 0 });
     }
     setIsObatModalOpen(true);
   };
@@ -450,7 +450,7 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
       setCurrentBhp(formData.bhp![index]);
     } else {
       setEditingBhpIndex(null);
-      setCurrentBhp({ sku: "", namaBhp: "", jumlah: 1, satuan: "" });
+      setCurrentBhp({ sku: "", namaBhp: "", jumlah: 1, satuan: "", harga: 0 });
     }
     setIsBhpModalOpen(true);
   };
@@ -1226,15 +1226,16 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
                 <tr className="border-b text-[0.75rem] font-bold text-gray-400 uppercase tracking-wider">
                   <th className="pb-[1rem] text-left">Nama Obat / Sediaan</th>
                   <th className="pb-[1rem] text-left w-[12rem]">Dosis</th>
-                  <th className="pb-[1rem] text-left w-[15rem]">Aturan Pakai</th>
+                  <th className="pb-[1rem] text-left w-[12rem]">Aturan Pakai</th>
                   <th className="pb-[1rem] text-center w-[6rem]">Jumlah</th>
+                  <th className="pb-[1rem] text-right w-[10rem]">Harga (Rp)</th>
                   <th className="pb-[1rem] text-center w-[8rem]">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {formData.plan?.terapiFarmakologi?.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-[3rem] text-center text-gray-400 italic">
+                    <td colSpan={6} className="py-[3rem] text-center text-gray-400 italic">
                       Belum ada resep obat yang ditambahkan
                     </td>
                   </tr>
@@ -1253,6 +1254,10 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
                       </td>
                       <td className="py-[1rem] pr-[1rem] text-center">
                         <span className="font-bold text-purple-700">{obat.jumlah}</span>
+                      </td>
+                      <td className="py-[1rem] pr-[1rem] text-right">
+                        <span className="font-bold text-gray-900">Rp {((obat.harga || 0) * (obat.jumlah || 1)).toLocaleString("id-ID")}</span>
+                        <div className="text-[0.625rem] text-gray-400">@ Rp {(obat.harga || 0).toLocaleString("id-ID")}</div>
                       </td>
                       <td className="py-[1rem] text-center">
                         <div className="flex items-center justify-center gap-[0.5rem]">
@@ -1305,15 +1310,16 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
               <thead>
                 <tr className="border-b text-[0.75rem] font-bold text-gray-400 uppercase tracking-wider">
                   <th className="pb-[1rem] text-left">Nama Barang / SKU</th>
-                  <th className="pb-[1rem] text-center w-[10rem]">Jumlah</th>
-                  <th className="pb-[1rem] text-center w-[10rem]">Satuan</th>
+                  <th className="pb-[1rem] text-center w-[8rem]">Jumlah</th>
+                  <th className="pb-[1rem] text-center w-[8rem]">Satuan</th>
+                  <th className="pb-[1rem] text-right w-[10rem]">Harga (Rp)</th>
                   <th className="pb-[1rem] text-center w-[8rem]">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {formData.bhp?.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-[3rem] text-center text-gray-400 italic">
+                    <td colSpan={5} className="py-[3rem] text-center text-gray-400 italic">
                       Belum ada penggunaan BHP yang ditambahkan
                     </td>
                   </tr>
@@ -1329,6 +1335,10 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
                       </td>
                       <td className="py-[1rem] pr-[1rem] text-center">
                         <span className="text-gray-500">{item.satuan}</span>
+                      </td>
+                      <td className="py-[1rem] pr-[1rem] text-right">
+                        <span className="font-bold text-gray-900">Rp {((item.harga || 0) * (item.jumlah || 1)).toLocaleString("id-ID")}</span>
+                        <div className="text-[0.625rem] text-gray-400">@ Rp {(item.harga || 0).toLocaleString("id-ID")}</div>
                       </td>
                       <td className="py-[1rem] text-center">
                         <div className="flex items-center justify-center gap-[0.5rem]">
@@ -2440,11 +2450,26 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
                 setCurrentObat(prev => ({
                   ...prev,
                   sku: selected?.sku || "",
-                  namaObat: val
+                  namaObat: val,
+                  harga: selected?.hargaJual || 0
                 }));
               }}
             />
           </FormGroup>
+          <div className="grid grid-cols-2 gap-[1rem]">
+            <FormGroup id="modal-obat-harga" label="Harga Satuan (Rp)">
+              <Input 
+                disabled 
+                value={(currentObat.harga || 0).toLocaleString("id-ID")}
+              />
+            </FormGroup>
+            <FormGroup id="modal-obat-total" label="Total (Rp)">
+              <Input 
+                disabled 
+                value={((currentObat.harga || 0) * (currentObat.jumlah || 1)).toLocaleString("id-ID")}
+              />
+            </FormGroup>
+          </div>
           <div className="grid grid-cols-2 gap-[1rem]">
             <FormGroup id="modal-obat-dosis" label="Dosis">
               <Input 
@@ -2494,11 +2519,26 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
                   ...prev,
                   sku: selected?.sku || "",
                   namaBhp: val,
-                  satuan: selected?.satuan || ""
+                  satuan: selected?.satuan || "",
+                  harga: selected?.hargaJual || 0
                 }));
               }}
             />
           </FormGroup>
+          <div className="grid grid-cols-2 gap-[1rem]">
+            <FormGroup id="modal-bhp-harga" label="Harga Satuan (Rp)">
+              <Input 
+                disabled 
+                value={(currentBhp.harga || 0).toLocaleString("id-ID")}
+              />
+            </FormGroup>
+            <FormGroup id="modal-bhp-total" label="Total (Rp)">
+              <Input 
+                disabled 
+                value={((currentBhp.harga || 0) * (currentBhp.jumlah || 1)).toLocaleString("id-ID")}
+              />
+            </FormGroup>
+          </div>
           <div className="grid grid-cols-2 gap-[1rem]">
             <FormGroup id="modal-bhp-jumlah" label="Jumlah">
               <Input 

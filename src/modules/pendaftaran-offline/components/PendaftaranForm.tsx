@@ -504,16 +504,28 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
               </FormGroup>
               <div className="grid grid-cols-2 gap-[1rem]">
                 <FormGroup id="provinsiLahir" label="Prov. Lahir" required>
-                  <Select id="provinsiLahir" value={formData.provinsiLahir} onChange={handleProvinsiLahirChange} required>
-                    <option value="">{tlLoading.provinces ? "Loading..." : "Pilih Prov"}</option>
-                    {tlProvinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </Select>
+                  <ComboBox 
+                    id="provinsiLahir" 
+                    value={formData.provinsiLahir} 
+                    onChange={(val) => {
+                      setFormData(prev => ({ ...prev, provinsiLahir: val, tempatLahir: "" }));
+                      fetchTlRegencies(val);
+                    }}
+                    options={tlProvinces.map(p => ({ label: p.name, value: p.id }))}
+                    placeholder={tlLoading.provinces ? "Loading..." : "Pilih Prov"}
+                    required 
+                  />
                 </FormGroup>
                 <FormGroup id="tempatLahir" label="Kota/Kab Lahir" required>
-                  <Select id="tempatLahir" value={formData.tempatLahir} onChange={handleChange("tempatLahir")} disabled={!formData.provinsiLahir} required>
-                    <option value="">{tlLoading.regencies ? "Loading..." : "Pilih Kota"}</option>
-                    {tlRegencies.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
-                  </Select>
+                  <ComboBox 
+                    id="tempatLahir" 
+                    value={formData.tempatLahir} 
+                    onChange={(val) => setFormData(prev => ({ ...prev, tempatLahir: val }))}
+                    options={tlRegencies.map(r => ({ label: r.name, value: r.name }))}
+                    disabled={!formData.provinsiLahir}
+                    placeholder={tlLoading.regencies ? "Loading..." : "Pilih Kota"}
+                    required 
+                  />
                 </FormGroup>
               </div>
               <FormGroup id="tanggalLahir" label="Tanggal Lahir" required>
@@ -566,28 +578,55 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
             <h3 className="mb-[1rem] text-lg font-semibold text-gray-900 border-b pb-[0.5rem]">Alamat & Domisili</h3>
             <div className="grid grid-cols-1 gap-[1.5rem] md:grid-cols-2 xl:grid-cols-4">
               <FormGroup id="provinsi" label="Provinsi" required>
-                <Select id="provinsi" value={formData.provinsi} onChange={handleProvinsiChange} required>
-                  <option value="">{loading.provinces ? "Loading..." : "Pilih Provinsi"}</option>
-                  {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </Select>
+                <ComboBox
+                  id="provinsi"
+                  value={formData.provinsi}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, provinsi: val, kabupaten: "", kecamatan: "", kelurahan: "" }));
+                    fetchRegencies(val);
+                  }}
+                  options={provinces.map(p => ({ label: p.name, value: p.id }))}
+                  placeholder={loading.provinces ? "Loading..." : "Pilih Provinsi"}
+                  required
+                />
               </FormGroup>
               <FormGroup id="kabupaten" label="Kabupaten / Kota" required>
-                <Select id="kabupaten" value={formData.kabupaten} onChange={handleKabupatenChange} disabled={!formData.provinsi} required>
-                  <option value="">{loading.regencies ? "Loading..." : "Pilih Kabupaten"}</option>
-                  {regencies.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                </Select>
+                <ComboBox
+                  id="kabupaten"
+                  value={formData.kabupaten}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, kabupaten: val, kecamatan: "", kelurahan: "" }));
+                    fetchDistricts(val);
+                  }}
+                  options={regencies.map(r => ({ label: r.name, value: r.id }))}
+                  disabled={!formData.provinsi}
+                  placeholder={loading.regencies ? "Loading..." : "Pilih Kabupaten"}
+                  required
+                />
               </FormGroup>
               <FormGroup id="kecamatan" label="Kecamatan" required>
-                <Select id="kecamatan" value={formData.kecamatan} onChange={handleKecamatanChange} disabled={!formData.kabupaten} required>
-                  <option value="">{loading.districts ? "Loading..." : "Pilih Kecamatan"}</option>
-                  {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </Select>
+                <ComboBox
+                  id="kecamatan"
+                  value={formData.kecamatan}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, kecamatan: val, kelurahan: "" }));
+                    fetchVillages(val);
+                  }}
+                  options={districts.map(d => ({ label: d.name, value: d.id }))}
+                  disabled={!formData.kabupaten}
+                  placeholder={loading.districts ? "Loading..." : "Pilih Kecamatan"}
+                  required
+                />
               </FormGroup>
               <FormGroup id="kelurahan" label="Kelurahan / Desa">
-                <Select id="kelurahan" value={formData.kelurahan} onChange={handleChange("kelurahan")} disabled={!formData.kecamatan}>
-                  <option value="">{loading.villages ? "Loading..." : "Pilih Kelurahan"}</option>
-                  {villages.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                </Select>
+                <ComboBox
+                  id="kelurahan"
+                  value={formData.kelurahan}
+                  onChange={(val) => setFormData(prev => ({ ...prev, kelurahan: val }))}
+                  options={villages.map(v => ({ label: v.name, value: v.id }))}
+                  disabled={!formData.kecamatan}
+                  placeholder={loading.villages ? "Loading..." : "Pilih Kelurahan"}
+                />
               </FormGroup>
               <FormGroup id="alamat" label="Alamat Detail" className="md:col-span-2 xl:col-span-4" required>
                 <Input id="alamat" value={formData.alamat} onChange={handleChange("alamat")} placeholder="Nama Jalan, RT/RW, dsb" required />
