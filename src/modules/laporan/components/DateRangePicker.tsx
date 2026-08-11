@@ -3,6 +3,7 @@ import { Calendar, Filter } from "lucide-react";
 import { DateRangeFilter } from "../types";
 import { tokens } from "../../../ui/styles/tokens";
 import { cn } from "../../../logic/utils/cn";
+import { Input } from "../../../ui/components/elements/Input";
 
 interface DateRangePickerProps {
   filter: DateRangeFilter;
@@ -83,21 +84,21 @@ export function DateRangePicker({ filter, onChange, className }: DateRangePicker
 
         {/* Date Inputs */}
         <div className="flex items-center gap-[0.5rem]">
-          <div className="relative flex items-center">
-            <input
+          <div className="relative flex items-center w-[9.5rem]">
+            <Input
               type="date"
               value={filter.startDate}
               onChange={(e) => onChange({ ...filter, startDate: e.target.value })}
-              className="h-[2.25rem] rounded-md border border-gray-300 bg-white px-[0.75rem] text-xs font-medium text-gray-900 focus:border-purple-700 focus:outline-hidden"
+              className="h-[2.25rem] text-xs"
             />
           </div>
           <span className="text-xs font-bold text-gray-400">s/d</span>
-          <div className="relative flex items-center">
-            <input
+          <div className="relative flex items-center w-[9.5rem]">
+            <Input
               type="date"
               value={filter.endDate}
               onChange={(e) => onChange({ ...filter, endDate: e.target.value })}
-              className="h-[2.25rem] rounded-md border border-gray-300 bg-white px-[0.75rem] text-xs font-medium text-gray-900 focus:border-purple-700 focus:outline-hidden"
+              className="h-[2.25rem] text-xs"
             />
           </div>
         </div>

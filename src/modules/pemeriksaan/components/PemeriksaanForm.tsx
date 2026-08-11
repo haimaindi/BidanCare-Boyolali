@@ -3,9 +3,9 @@ import { motion } from "motion/react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../ui/components/common/Card";
 import { updateRegistrationStatus } from "../../../logic/services/pendaftaranService.js";
 import { usePemeriksaan } from "../../../logic/hooks/usePemeriksaan.js";
-import { fetchObatStokBerjalanList } from "../../../logic/services/manajemenObatService.js";
-import { fetchBhpStokBerjalanList } from "../../../logic/services/manajemenBhpService.js";
-import { fetchMasterLayananLainList } from "../../../logic/services/masterLayananLainService.js";
+import { fetchObatStokBerjalanList, addObatMasukEntry } from "../../../logic/services/manajemenObatService.js";
+import { fetchBhpStokBerjalanList, addBhpMasukEntry } from "../../../logic/services/manajemenBhpService.js";
+import { fetchMasterLayananLainList, createMasterLayananLainItem } from "../../../logic/services/masterLayananLainService.js";
 import { fetchMasterKbList } from "../../../logic/services/masterKbService.js";
 import { fetchMasterImunisasiList } from "../../../logic/services/masterImunisasiService.js";
 import { FormGroup } from "../../../ui/components/common/FormGroup";
@@ -14,6 +14,7 @@ import { Textarea } from "../../../ui/components/elements/Textarea";
 import { Button } from "../../../ui/components/elements/Button";
 import { Select } from "../../../ui/components/elements/Select";
 import { ComboBox } from "../../../ui/components/elements/ComboBox";
+import { PriceInput } from "../../../ui/components/elements/PriceInput";
 import { AntreanPemeriksaan, PemeriksaanData } from "../types";
 import { tokens } from "../../../ui/styles/tokens";
 import { Plus, Trash2, Save, ArrowLeft, Search, Pill, Package, Syringe, Edit, CheckCircle, ClipboardCheck, Play } from "lucide-react";
@@ -581,6 +582,42 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          // Auto-register manual items
+          const manualObat = formData.plan?.terapiFarmakologi?.filter(o => o.sku.startsWith("M-OBAT-")) || [];
+          const manualBhp = formData.bhp?.filter(b => b.sku.startsWith("M-BHP-")) || [];
+          const manualLayanan = formData.plan?.layananLain?.filter(l => l.id.startsWith("M-SERV-")) || [];
+
+          for (const o of manualObat) {
+            await addObatMasukEntry({
+              sku: o.sku,
+              namaObat: o.namaObat,
+              namaMerk: "-",
+              bentukSediaan: "Tablet",
+              dosisSediaan: "-",
+              qtyMasuk: 100, // Initial stock for manual entry
+              hargaBeli: (o.harga || 0) * 0.8, // Estimate cost
+            });
+          }
+
+          for (const b of manualBhp) {
+            await addBhpMasukEntry({
+              sku: b.sku,
+              namaBhp: b.namaBhp,
+              kategori: "Alat Medis",
+              satuan: b.satuan || "pcs",
+              qtyMasuk: 100,
+              hargaBeli: (b.harga || 0) * 0.8,
+            });
+          }
+
+          for (const l of manualLayanan) {
+            await createMasterLayananLainItem({
+              nama: l.nama,
+              harga: l.biaya,
+              keterangan: "Input Manual via Pemeriksaan"
+            });
+          }
+
           await savePemeriksaanDb(formData as any);
           Swal.fire("Berhasil!", "Data pemeriksaan telah disimpan.", "success");
         } catch (err: any) {
@@ -2442,25 +2479,27 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
         <div className="space-y-[1.25rem]">
           <FormGroup id="modal-obat-nama" label="Cari Obat">
             <ComboBox 
-              options={(listObat.length > 0 ? listObat : DUMMY_STOK_BERJALAN).map(o => `${o.namaObat} (${o.bentukSediaan} - ${o.dosisSediaan})`)}
+              allowCustom
+              options={listObat.map(o => `${o.namaObat} (${o.bentukSediaan} - ${o.dosisSediaan})`)}
               value={currentObat.namaObat}
               placeholder="Cari obat dari stok..."
               onChange={(val) => {
-                const selected = (listObat.length > 0 ? listObat : DUMMY_STOK_BERJALAN).find(o => `${o.namaObat} (${o.bentukSediaan} - ${o.dosisSediaan})` === val);
+                const selected = listObat.find(o => `${o.namaObat} (${o.bentukSediaan} - ${o.dosisSediaan})` === val);
                 setCurrentObat(prev => ({
                   ...prev,
-                  sku: selected?.sku || "",
+                  sku: selected?.sku || `M-OBAT-${Date.now()}`,
                   namaObat: val,
-                  harga: selected?.hargaJual || 0
+                  harga: selected?.hargaJual || prev.harga || 0
                 }));
               }}
             />
           </FormGroup>
           <div className="grid grid-cols-2 gap-[1rem]">
             <FormGroup id="modal-obat-harga" label="Harga Satuan (Rp)">
-              <Input 
-                disabled 
-                value={(currentObat.harga || 0).toLocaleString("id-ID")}
+              <PriceInput 
+                disabled={!currentObat.sku.startsWith("M-OBAT-")}
+                value={currentObat.harga || 0}
+                onChange={(e) => setCurrentObat(prev => ({ ...prev, harga: parseInt(e.target.value) || 0 }))}
               />
             </FormGroup>
             <FormGroup id="modal-obat-total" label="Total (Rp)">
@@ -2510,26 +2549,28 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
         <div className="space-y-[1.25rem]">
           <FormGroup id="modal-bhp-nama" label="Cari BHP">
             <ComboBox 
-              options={(listBhp.length > 0 ? listBhp : DUMMY_STOK_BERJALAN_BHP).map(b => b.namaBhp)}
+              allowCustom
+              options={listBhp.map(b => b.namaBhp)}
               value={currentBhp.namaBhp}
               placeholder="Cari BHP dari stok..."
               onChange={(val) => {
-                const selected = (listBhp.length > 0 ? listBhp : DUMMY_STOK_BERJALAN_BHP).find(b => b.namaBhp === val);
+                const selected = listBhp.find(b => b.namaBhp === val);
                 setCurrentBhp(prev => ({
                   ...prev,
-                  sku: selected?.sku || "",
+                  sku: selected?.sku || `M-BHP-${Date.now()}`,
                   namaBhp: val,
-                  satuan: selected?.satuan || "",
-                  harga: selected?.hargaJual || 0
+                  satuan: selected?.satuan || prev.satuan || "pcs",
+                  harga: selected?.hargaJual || prev.harga || 0
                 }));
               }}
             />
           </FormGroup>
           <div className="grid grid-cols-2 gap-[1rem]">
             <FormGroup id="modal-bhp-harga" label="Harga Satuan (Rp)">
-              <Input 
-                disabled 
-                value={(currentBhp.harga || 0).toLocaleString("id-ID")}
+              <PriceInput 
+                disabled={!currentBhp.sku.startsWith("M-BHP-")}
+                value={currentBhp.harga || 0}
+                onChange={(e) => setCurrentBhp(prev => ({ ...prev, harga: parseInt(e.target.value) || 0 }))}
               />
             </FormGroup>
             <FormGroup id="modal-bhp-total" label="Total (Rp)">
@@ -2549,8 +2590,9 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
             </FormGroup>
             <FormGroup id="modal-bhp-satuan" label="Satuan">
               <Input 
-                disabled
+                disabled={!currentBhp.sku.startsWith("M-BHP-")}
                 value={currentBhp.satuan}
+                onChange={(e) => setCurrentBhp(prev => ({ ...prev, satuan: e.target.value }))}
               />
             </FormGroup>
           </div>
@@ -2571,24 +2613,26 @@ export function PemeriksaanForm({ patient, isReadOnly = false, onBack, onSickLea
         <div className="space-y-[1.25rem]">
           <FormGroup id="modal-layanan-nama" label="Cari Layanan">
             <ComboBox 
-              options={(listLayananLain.length > 0 ? listLayananLain : dummyLayananLainData).map(l => l.nama)}
+              allowCustom
+              options={listLayananLain.map(l => l.nama)}
               value={currentLayanan.nama}
               placeholder="Cari layanan..."
               onChange={(val) => {
-                const selected = (listLayananLain.length > 0 ? listLayananLain : dummyLayananLainData).find(l => l.nama === val);
+                const selected = listLayananLain.find(l => l.nama === val);
                 setCurrentLayanan(prev => ({
                   ...prev,
-                  id: selected?.id || "",
+                  id: selected?.id || `M-SERV-${Date.now()}`,
                   nama: val,
-                  biaya: selected?.harga || 0
+                  biaya: selected?.harga || prev.biaya || 0
                 }));
               }}
             />
           </FormGroup>
           <FormGroup id="modal-layanan-biaya" label="Biaya">
-            <Input 
-              disabled
-              value={currentLayanan.biaya.toLocaleString("id-ID")}
+            <PriceInput 
+              disabled={!currentLayanan.id.startsWith("M-SERV-")}
+              value={currentLayanan.biaya}
+              onChange={(e) => setCurrentLayanan(prev => ({ ...prev, biaya: parseInt(e.target.value) || 0 }))}
             />
           </FormGroup>
         </div>

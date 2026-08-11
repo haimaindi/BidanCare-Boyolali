@@ -17,7 +17,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           tokens.colors.border.base,
           tokens.colors.text.base,
           error ? "border-rose-500 focus-visible:ring-rose-500" : "focus-visible:ring-purple-700",
-          (props.type === "date" || props.type === "datetime-local") && "relative [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100",
+          (props.type === "date" || props.type === "datetime-local") && "relative pl-[2.25rem] [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-[0.5rem] [&::-webkit-calendar-picker-indicator]:w-[1.25rem] [&::-webkit-calendar-picker-indicator]:h-[1.25rem] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100",
           className
         )}
         {...props}

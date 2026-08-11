@@ -65,6 +65,7 @@ export interface PemeriksaanData {
       dosis: string;
       aturanPakai: string;
       jumlah: number;
+      harga?: number;
     }[];
     layananLain: {
       id: string;
@@ -78,6 +79,7 @@ export interface PemeriksaanData {
     namaBhp: string;
     jumlah: number;
     satuan: string;
+    harga?: number;
   }[];
   // h. Data KB (Optional)
   kb?: {

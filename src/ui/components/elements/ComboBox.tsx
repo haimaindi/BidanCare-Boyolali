@@ -12,10 +12,11 @@ export interface ComboBoxProps extends Omit<InputHTMLAttributes<HTMLInputElement
   value: string;
   onChange: (val: string) => void;
   error?: boolean;
+  allowCustom?: boolean;
 }
 
 export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
-  ({ className, options, value, onChange, error, placeholder, ...props }, ref) => {
+  ({ className, options, value, onChange, error, placeholder, allowCustom, ...props }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
@@ -51,7 +52,7 @@ export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
     );
 
     return (
-      <div className="relative" ref={containerRef}>
+      <div className="relative w-full" ref={containerRef}>
         <input
           ref={ref}
           value={searchTerm}
@@ -93,9 +94,21 @@ export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
                 </div>
               ))
             ) : (
-              <div className="px-[0.75rem] py-[0.5rem] text-sm text-gray-400 italic">
-                Tidak ditemukan
-              </div>
+              allowCustom && searchTerm.trim() ? (
+                <div
+                  className="cursor-pointer px-[0.75rem] py-[0.5rem] text-sm text-purple-700 font-semibold hover:bg-purple-50"
+                  onClick={() => {
+                    onChange(searchTerm);
+                    setIsOpen(false);
+                  }}
+                >
+                  Gunakan: "{searchTerm}" (Input Manual)
+                </div>
+              ) : (
+                <div className="px-[0.75rem] py-[0.5rem] text-sm text-gray-400 italic">
+                  Tidak ditemukan
+                </div>
+              )
             )}
           </div>
         )}
