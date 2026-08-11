@@ -3,7 +3,7 @@ import { cn } from '../../../logic/utils/cn';
 
 export interface Column<T> {
   header: string;
-  accessor: keyof T | ((item: T) => ReactNode);
+  accessor: keyof T | ((item: T, index: number) => ReactNode);
   className?: string;
   headerClassName?: string;
 }
@@ -45,7 +45,7 @@ export function TableModule<T>({
         </thead>
         <tbody className="divide-y divide-neutral-100">
           {data.length > 0 ? (
-            data.map((item) => (
+            data.map((item, rowIndex) => (
               <tr
                 key={keyExtractor(item)}
                 onClick={() => onRowClick?.(item)}
@@ -63,7 +63,7 @@ export function TableModule<T>({
                     )}
                   >
                     {typeof column.accessor === 'function'
-                      ? column.accessor(item)
+                      ? column.accessor(item, rowIndex)
                       : (item[column.accessor] as ReactNode)}
                   </td>
                 ))}

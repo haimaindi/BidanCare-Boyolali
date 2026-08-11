@@ -91,17 +91,17 @@ export function AntreanTable({ onEdit }: AntreanTableProps) {
     return null;
   };
 
-  const activeAntrean = antreanList.filter(item => item.status !== 'Batal');
+  const activeAntrean = antreanList.filter(item => item.status !== 'Batal' && item.status !== 'Selesai');
 
   const columns: Column<typeof activeAntrean[0]>[] = [
     {
       header: 'No Antrian',
-      accessor: (item) => {
-        const currentQueueNumber = item.status !== "Selesai" ? activeQueue++ : "-";
+      accessor: (item, index) => {
+        const currentQueueNumber = index !== undefined ? index + 1 : "-";
         return (
           <div className="flex flex-col items-center">
             <div className="text-base font-bold text-brand-600">{currentQueueNumber}</div>
-            <div className="text-xs text-neutral-500">{item.noAntrean}</div>
+            <div className="text-[0.65rem] text-neutral-400 font-medium">{item.noAntrean}</div>
           </div>
         );
       },

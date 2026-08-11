@@ -56,7 +56,7 @@ export function RiwayatKunjunganTable() {
     setEndDate(toDateString(end));
   }, [quick]);
 
-  const historyData = allItems;
+  const historyData = allItems.filter(p => p.status === 'Selesai' || p.status === 'Batal');
 
   const filtered = historyData.filter(p => {
     const matchSearch = (p.nama?.toLowerCase() || "").includes(search.toLowerCase()) || (p.noRm?.toLowerCase() || "").includes(search.toLowerCase());
