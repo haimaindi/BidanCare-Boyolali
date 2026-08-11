@@ -14,6 +14,8 @@ import {
   fetchVisitLogsForPatient,
   createVisitLog,
   FetchPatientsParams,
+  searchPatients as searchPatientsService,
+  getPatientByNIK as getPatientByNIKService,
 } from '../services/masterRekamMedisService.js';
 import { realtimeService } from '../services/realtimeService.js';
 
@@ -70,6 +72,14 @@ export function useMasterRekamMedis(initialParams: FetchPatientsParams = {}) {
     return await findPatientByNikOrRm(nikOrRm);
   }, []);
 
+  const searchPatients = useCallback(async (query: string) => {
+    return await searchPatientsService(query);
+  }, []);
+
+  const getPatientByNIK = useCallback(async (nik: string) => {
+    return await getPatientByNIKService(nik);
+  }, []);
+
   const addPatient = useCallback(
     async (data: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
       const created = await createPatientItem(data);
@@ -114,6 +124,8 @@ export function useMasterRekamMedis(initialParams: FetchPatientsParams = {}) {
     setSearchQuery,
     reload: loadPatients,
     searchPatient,
+    searchPatients,
+    getPatientByNIK,
     addPatient,
     editPatient,
     syncPatient,

@@ -50,9 +50,9 @@ export function MasterRekamMedisModule() {
   };
 
   const filteredPatients = patients.filter(p => 
-    p.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.noRm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.nik.includes(searchTerm)
+    (p.nama?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (p.noRm?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (p.nik || "").includes(searchTerm)
   );
 
   const handleAddPatient = async (data: Partial<Patient>) => {

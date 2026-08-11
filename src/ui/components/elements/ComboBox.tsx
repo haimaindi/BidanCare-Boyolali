@@ -24,13 +24,15 @@ export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const filteredOptions = options.filter(opt => opt.toLowerCase().includes(value.toLowerCase()));
+    const filteredOptions = (options || []).filter(opt => 
+      (opt || "").toLowerCase().includes((value || "").toLowerCase())
+    );
 
     return (
       <div className="relative" ref={containerRef}>
         <input
           ref={ref}
-          value={value}
+          value={value || ""}
           onChange={(e) => {
             onChange(e.target.value);
             setIsOpen(true);
@@ -53,7 +55,7 @@ export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
                 key={idx}
                 className="cursor-pointer px-[0.75rem] py-[0.5rem] text-sm hover:bg-purple-50 hover:text-purple-700"
                 onClick={() => {
-                  onChange(opt);
+                  onChange(opt || "");
                   setIsOpen(false);
                 }}
               >

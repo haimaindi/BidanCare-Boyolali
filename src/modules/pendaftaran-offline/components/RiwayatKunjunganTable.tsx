@@ -59,7 +59,7 @@ export function RiwayatKunjunganTable() {
   const historyData = allItems;
 
   const filtered = historyData.filter(p => {
-    const matchSearch = p.nama.toLowerCase().includes(search.toLowerCase()) || p.noRm.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (p.nama?.toLowerCase() || "").includes(search.toLowerCase()) || (p.noRm?.toLowerCase() || "").includes(search.toLowerCase());
     
     let matchDate = true;
     if (startDate && endDate) {

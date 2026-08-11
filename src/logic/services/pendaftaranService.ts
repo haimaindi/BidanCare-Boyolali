@@ -165,10 +165,10 @@ export async function fetchPendaftaranList(
   if (search) {
     filtered = filtered.filter(
       (item) =>
-        item.nama.toLowerCase().includes(search) ||
-        item.noAntrean.toLowerCase().includes(search) ||
-        item.noRm.toLowerCase().includes(search) ||
-        item.nik.toLowerCase().includes(search)
+        (item.nama?.toLowerCase() || "").includes(search) ||
+        (item.noAntrean?.toLowerCase() || "").includes(search) ||
+        (item.noRm?.toLowerCase() || "").includes(search) ||
+        (item.nik?.toLowerCase() || "").includes(search)
     );
   }
 

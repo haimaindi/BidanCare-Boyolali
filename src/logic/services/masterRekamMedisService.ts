@@ -167,9 +167,9 @@ export async function fetchPatientList(
   if (search) {
     filtered = localCache.filter(
       (p) =>
-        p.nama.toLowerCase().includes(search) ||
-        p.nik.toLowerCase().includes(search) ||
-        p.noRm.toLowerCase().includes(search)
+        (p.nama?.toLowerCase() || '').includes(search) ||
+        (p.nik?.toLowerCase() || '').includes(search) ||
+        (p.noRm?.toLowerCase() || '').includes(search)
     );
   }
 
@@ -193,10 +193,22 @@ export async function findPatientByNikOrRm(identifier: string): Promise<Patient 
 
   const res = await fetchPatientList({ search: query, strategy: 'full' });
   const exactMatch = res.items.find(
-    (p) => p.nik.toLowerCase() === query || p.noRm.toLowerCase() === query
+    (p) => (p.nik?.toLowerCase() || '') === query || (p.noRm?.toLowerCase() || '') === query
   );
 
   return exactMatch || res.items[0] || null;
+}
+
+export async function searchPatients(query: string): Promise<Patient[]> {
+  if (!query || query.length < 3) return [];
+  const res = await fetchPatientList({ search: query, strategy: 'full' });
+  return res.items;
+}
+
+export async function getPatientByNIK(nik: string): Promise<Patient | null> {
+  if (!nik) return null;
+  const res = await fetchPatientList({ search: nik, strategy: 'full' });
+  return res.items.find(p => p.nik === nik) || null;
 }
 
 export function generateNextNoRm(existingPatients: Patient[]): string {

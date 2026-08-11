@@ -35,9 +35,9 @@ export function BookingOnlineTable({ onProcess }: BookingOnlineTableProps) {
   };
 
   const filtered = onlineItems.filter(p => 
-    p.nama.toLowerCase().includes(search.toLowerCase()) || 
-    p.nik.includes(search) ||
-    p.noAntrean.toLowerCase().includes(search.toLowerCase())
+    (p.nama?.toLowerCase() || "").includes(search.toLowerCase()) || 
+    (p.nik || "").includes(search) ||
+    (p.noAntrean?.toLowerCase() || "").includes(search.toLowerCase())
   );
 
   const getLayananBadgeClasses = (layanan: string) => {

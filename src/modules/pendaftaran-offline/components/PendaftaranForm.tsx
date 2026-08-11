@@ -33,16 +33,19 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
   } = useRegionData();
 
   const { data: puskList } = useMasterPuskesmas({ strategy: 'full' });
-  const { patients, searchPatient } = useMasterRekamMedis();
+  const { patients, searchPatient, searchPatients, getPatientByNIK } = useMasterRekamMedis();
   const { registerNewPatient } = usePendaftaran();
 
   const [isExistingPatient, setIsExistingPatient] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [pendingNik, setPendingNik] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const puskesmasOptions = Array.from(
     new Set([
-      ...puskList.map(p => p.nama),
+      ...puskList.map(p => p.nama).filter(Boolean),
       "Puskesmas Kecamatan",
       "Puskesmas Kelurahan",
       "Puskesmas Pembantu (Pustu)"
@@ -50,7 +53,7 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
   );
 
   const patientNikOptions = Array.from(
-    new Set(patients.map(p => p.nik))
+    new Set(patients.map(p => p.nik).filter(Boolean))
   );
 
   const [formData, setFormData] = useState({
@@ -99,47 +102,80 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
     }
   }, [initialData]);
 
+  const handleSelectPatient = (patient: any) => {
+    setFormData(prev => ({
+      ...prev,
+      nik: patient.nik,
+      jenisPasien: "Lama",
+      noRm: patient.noRm,
+      jenisPanggilan: patient.panggilan || prev.jenisPanggilan,
+      namaPasien: patient.nama,
+      tanggalLahir: patient.tanggalLahir,
+      alamat: patient.alamat || prev.alamat,
+      noWhatsapp: patient.noWhatsapp || prev.noWhatsapp,
+      puskesmas: patient.puskesmas || prev.puskesmas,
+      pekerjaan: patient.pekerjaan || prev.pekerjaan,
+      golDarah: patient.golDarah || prev.golDarah,
+      provinsi: patient.provinsi || prev.provinsi,
+      kabupaten: patient.kabupaten || prev.kabupaten,
+      kecamatan: patient.kecamatan || prev.kecamatan,
+      kelurahan: patient.kelurahan || prev.kelurahan,
+      kk: patient.kk || prev.kk,
+      noBpjs: patient.noBpjs || prev.noBpjs,
+      namaSuamiIstri: patient.namaSuamiIstri || prev.namaSuamiIstri,
+      nikSuami: patient.nikSuami || prev.nikSuami,
+      noTelpSuami: patient.noTelpSuami || prev.noTelpSuami,
+      namaOrangTua: patient.namaOrangTua || prev.namaOrangTua,
+      nikOrangTua: patient.nikOrangTua || prev.nikOrangTua,
+      noTelpOrangTua: patient.noTelpOrangTua || prev.noTelpOrangTua,
+      catatanKhusus: patient.catatanKhusus || prev.catatanKhusus,
+    }));
+    setIsExistingPatient(true);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.length >= 3) {
+        setIsSearching(true);
+        try {
+          const results = await searchPatients(searchQuery);
+          setSearchResults(results);
+        } catch (err) {
+          console.error("Search error:", err);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, searchPatients]);
+
   const handleNikSearch = async (nikValue: string) => {
-    let patient = patients.find(p => p.nik === nikValue || p.noRm === nikValue);
+    if (nikValue.length < 16) {
+      if (formData.jenisPasien === "Lama") {
+        setIsExistingPatient(false);
+        setFormData(prev => ({ ...prev, jenisPasien: "Baru" }));
+      }
+      return;
+    }
+
+    let patient = patients.find(p => p.nik === nikValue);
     if (!patient) {
-      patient = (await searchPatient(nikValue)) || undefined;
+      patient = (await getPatientByNIK(nikValue)) || undefined;
     }
     
     if (patient) {
-      setFormData(prev => ({
-        ...prev,
-        nik: patient!.nik,
-        jenisPasien: "Lama",
-        noRm: patient!.noRm,
-        jenisPanggilan: patient!.panggilan || prev.jenisPanggilan,
-        namaPasien: patient!.nama,
-        tanggalLahir: patient!.tanggalLahir,
-        alamat: patient!.alamat || prev.alamat,
-        noWhatsapp: patient!.noWhatsapp || prev.noWhatsapp,
-        puskesmas: patient!.puskesmas || prev.puskesmas,
-        pekerjaan: patient!.pekerjaan || prev.pekerjaan,
-        golDarah: patient!.golDarah || prev.golDarah,
-        provinsi: patient!.provinsi || prev.provinsi,
-        kabupaten: patient!.kabupaten || prev.kabupaten,
-        kecamatan: patient!.kecamatan || prev.kecamatan,
-        kelurahan: patient!.kelurahan || prev.kelurahan,
-        kk: patient!.kk || prev.kk,
-        noBpjs: patient!.noBpjs || prev.noBpjs,
-        namaSuamiIstri: patient!.namaSuamiIstri || prev.namaSuamiIstri,
-        nikSuami: patient!.nikSuami || prev.nikSuami,
-        noTelpSuami: patient!.noTelpSuami || prev.noTelpSuami,
-        namaOrangTua: patient!.namaOrangTua || prev.namaOrangTua,
-        nikOrangTua: patient!.nikOrangTua || prev.nikOrangTua,
-        noTelpOrangTua: patient!.noTelpOrangTua || prev.noTelpOrangTua,
-        catatanKhusus: patient!.catatanKhusus || prev.catatanKhusus,
-      }));
-      setIsExistingPatient(true);
+      handleSelectPatient(patient);
     } else {
       setIsExistingPatient(false);
-      if (formData.jenisPasien === "Baru") {
-        const newRm = `RM-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
-        setFormData(prev => ({ ...prev, noRm: newRm }));
-      }
+      setFormData(prev => ({ ...prev, jenisPasien: "Baru" }));
+      const newRm = `RM-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+      setFormData(prev => ({ ...prev, noRm: newRm }));
     }
   };
 
@@ -339,6 +375,41 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
       <CardContent className="pt-[1.5rem]">
         <form className="space-y-[2rem]" onSubmit={handleSaveAndSubmit}>
           
+          {/* Pencarian Pasien Lama */}
+          <div className="relative">
+            <h3 className="mb-[1rem] text-lg font-semibold text-gray-900 border-b pb-[0.5rem]">Cari Pasien Lama</h3>
+            <div className="relative">
+              <Input
+                id="search_patient"
+                placeholder="Cari berdasarkan No RM, NIK, atau Nama Pasien..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-[2.5rem]"
+              />
+              {isSearching && (
+                <div className="absolute right-[0.75rem] top-1/2 -translate-y-1/2">
+                  <div className="w-[1rem] h-[1rem] border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+            
+            {searchResults.length > 0 && (
+              <div className="absolute z-10 w-full mt-[0.25rem] bg-white border border-gray-200 rounded-[0.5rem] shadow-lg max-h-[15rem] overflow-y-auto">
+                {searchResults.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handleSelectPatient(p)}
+                    className="w-full text-left px-[1rem] py-[0.75rem] hover:bg-gray-50 border-b last:border-0 flex flex-col"
+                  >
+                    <span className="font-semibold text-gray-900">{p.panggilan} {p.nama}</span>
+                    <span className="text-[0.75rem] text-gray-500">No RM: {p.noRm} | NIK: {p.nik}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Section 1: Kunjungan */}
           <div>
             <h3 className="mb-[1rem] text-lg font-semibold text-gray-900 border-b pb-[0.5rem]">Data Kunjungan</h3>
@@ -380,13 +451,9 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
               <FormGroup id="jenisPasien" label="Jenis Pasien" required>
                 <div className="flex h-[2.5rem] items-center gap-[0.75rem]">
                   <span className={cn("text-sm", formData.jenisPasien === "Baru" ? "font-semibold text-purple-700" : "text-gray-500")}>Baru</span>
-                  <button
-                    type="button"
-                    disabled={isExistingPatient}
-                    onClick={() => setFormData(prev => ({...prev, jenisPasien: prev.jenisPasien === "Baru" ? "Lama" : "Baru"}))}
+                  <div
                     className={cn(
-                      "relative inline-flex h-[1.5rem] w-[3rem] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                      isExistingPatient ? "bg-gray-300 cursor-not-allowed" : "bg-purple-700"
+                      "relative inline-flex h-[1.5rem] w-[3rem] shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-gray-200 opacity-80",
                     )}
                   >
                     <span
@@ -396,9 +463,10 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
                         formData.jenisPasien === "Lama" ? "translate-x-[1.5rem]" : "translate-x-0"
                       )}
                     />
-                  </button>
+                  </div>
                   <span className={cn("text-sm", formData.jenisPasien === "Lama" ? "font-semibold text-purple-700" : "text-gray-500")}>Lama</span>
                 </div>
+                <p className="text-[0.7rem] text-gray-400 italic">Status terdeteksi otomatis</p>
               </FormGroup>
               <FormGroup id="noRm" label="No RM" required>
                 <Input id="noRm" value={formData.noRm} onChange={handleChange("noRm")} required />

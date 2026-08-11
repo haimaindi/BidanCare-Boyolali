@@ -30,9 +30,9 @@ export function MenungguCheckInTable() {
   };
 
   const filtered = checkInItems.filter(p => 
-    p.nama.toLowerCase().includes(search.toLowerCase()) || 
-    p.noRm.includes(search) ||
-    p.nik.includes(search)
+    (p.nama?.toLowerCase() || "").includes(search.toLowerCase()) || 
+    (p.noRm || "").includes(search) ||
+    (p.nik || "").includes(search)
   );
 
   const handleConfirmCheckIn = async (id: string) => {

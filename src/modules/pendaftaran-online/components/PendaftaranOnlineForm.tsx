@@ -6,6 +6,7 @@ import { Select } from "../../../ui/components/elements/Select";
 import { Button } from "../../../ui/components/elements/Button";
 import { ComboBox } from "../../../ui/components/elements/ComboBox";
 import { useRegionData } from "../../../logic/hooks/useRegionData";
+import { useMasterRekamMedis } from "../../../logic/hooks/useMasterRekamMedis";
 import { cn } from "../../../logic/utils/cn";
 
 interface PendaftaranOnlineFormProps {
@@ -25,6 +26,10 @@ export function PendaftaranOnlineForm({ onSubmitSuccess }: PendaftaranOnlineForm
     fetchRegencies: fetchTlRegencies,
     loading: tlLoading
   } = useRegionData();
+
+  const { getPatientByNIK } = useMasterRekamMedis();
+  const [isExistingPatient, setIsExistingPatient] = useState(false);
+  const [checkingNik, setCheckingNik] = useState(false);
 
   const [formData, setFormData] = useState({
     estimasiWaktu: "",
@@ -61,9 +66,42 @@ export function PendaftaranOnlineForm({ onSubmitSuccess }: PendaftaranOnlineForm
     return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
   };
 
-  const handleNumberChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumberChange = (field: keyof typeof formData) => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, "");
     setFormData(prev => ({ ...prev, [field]: val }));
+
+    if (field === "nik" && val.length === 16) {
+      setCheckingNik(true);
+      try {
+        const patient = await getPatientByNIK(val);
+        if (patient) {
+          setIsExistingPatient(true);
+          // Pre-fill form with existing patient data
+          setFormData(prev => ({
+            ...prev,
+            kk: patient.kk || prev.kk,
+            noBpjs: patient.noBpjs || prev.noBpjs,
+            jenisPanggilan: patient.panggilan || prev.jenisPanggilan,
+            namaPasien: patient.nama,
+            tanggalLahir: patient.tanggalLahir,
+            golDarah: patient.golDarah || prev.golDarah,
+            pekerjaan: patient.pekerjaan || prev.pekerjaan,
+            noWhatsapp: patient.noWhatsapp || prev.noWhatsapp,
+            alamat: patient.alamat || prev.alamat,
+          }));
+          // Note: Region data (provinsi, etc) are IDs in the hook but might be names in the record. 
+          // For simplicity and safety, we focus on main fields.
+        } else {
+          setIsExistingPatient(false);
+        }
+      } catch (err) {
+        console.error("Check NIK error:", err);
+      } finally {
+        setCheckingNik(false);
+      }
+    } else if (field === "nik" && val.length < 16) {
+      setIsExistingPatient(false);
+    }
   };
 
   const handlePhoneChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,7 +194,23 @@ export function PendaftaranOnlineForm({ onSubmitSuccess }: PendaftaranOnlineForm
 
           {/* Section 2: Identitas Pasien */}
           <div>
-            <h3 className="mb-[1rem] text-lg font-semibold text-gray-900 border-b pb-[0.5rem]">Identitas Pasien</h3>
+            <div className="flex items-center justify-between mb-[1rem] border-b pb-[0.5rem]">
+              <h3 className="text-lg font-semibold text-gray-900">Identitas Pasien</h3>
+              {formData.nik.length === 16 && !checkingNik && (
+                <div className={cn(
+                  "px-[0.75rem] py-[0.25rem] rounded-full text-[0.75rem] font-bold uppercase tracking-wider",
+                  isExistingPatient ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                )}>
+                  {isExistingPatient ? "PASIEN LAMA TERDETEKSI" : "PASIEN BARU"}
+                </div>
+              )}
+              {checkingNik && (
+                <div className="flex items-center gap-[0.5rem] text-[0.75rem] text-gray-500">
+                  <div className="w-[0.75rem] h-[0.75rem] border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  Memverifikasi NIK...
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-[1.5rem] md:grid-cols-2 xl:grid-cols-3">
               <FormGroup id="nik" label="NIK" required>
                 <Input id="nik" value={formData.nik} onChange={handleNumberChange("nik")} placeholder="16 Digit NIK" required maxLength={16} />

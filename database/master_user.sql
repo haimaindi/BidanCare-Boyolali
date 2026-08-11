@@ -6,12 +6,12 @@
 
 CREATE TABLE IF NOT EXISTS master_user (
     id VARCHAR(36) PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    jenis_user VARCHAR(50) NOT NULL,
+    nama VARCHAR(255),
+    jenis_user VARCHAR(50),
     str VARCHAR(100),
     sip VARCHAR(100),
     no_whatsapp VARCHAR(50),
-    access_id VARCHAR(100) UNIQUE NOT NULL,
+    access_id VARCHAR(100) UNIQUE,
     access_password TEXT,
     permissions TEXT[] DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
