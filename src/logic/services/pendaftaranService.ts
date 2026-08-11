@@ -250,6 +250,24 @@ export interface RegisterPatientInput {
   tanggalBooking?: string;
   jamBooking?: string;
   isMenungguCheckIn?: boolean;
+  // Patient details for sync
+  kk?: string;
+  noBpjs?: string;
+  provinsiLahir?: string;
+  tempatLahir?: string;
+  golDarah?: string;
+  pekerjaan?: string;
+  provinsi?: string;
+  kabupaten?: string;
+  kecamatan?: string;
+  kelurahan?: string;
+  namaSuamiIstri?: string;
+  nikSuami?: string;
+  noTelpSuami?: string;
+  namaOrangTua?: string;
+  nikOrangTua?: string;
+  noTelpOrangTua?: string;
+  catatanKhusus?: string;
 }
 
 export async function createRegistration(
@@ -285,6 +303,23 @@ export async function createRegistration(
     alamat: input.alamat,
     noWhatsapp: input.noWhatsapp,
     puskesmas: input.puskesmas,
+    kk: input.kk,
+    noBpjs: input.noBpjs,
+    provinsiLahir: input.provinsiLahir,
+    tempatLahir: input.tempatLahir,
+    golDarah: input.golDarah,
+    pekerjaan: input.pekerjaan,
+    provinsi: input.provinsi,
+    kabupaten: input.kabupaten,
+    kecamatan: input.kecamatan,
+    kelurahan: input.kelurahan,
+    namaSuamiIstri: input.namaSuamiIstri,
+    nikSuami: input.nikSuami,
+    noTelpSuami: input.noTelpSuami,
+    namaOrangTua: input.namaOrangTua,
+    nikOrangTua: input.nikOrangTua,
+    noTelpOrangTua: input.noTelpOrangTua,
+    catatanKhusus: input.catatanKhusus,
   });
 
   // 3. Generate queue number and prepare registration entry

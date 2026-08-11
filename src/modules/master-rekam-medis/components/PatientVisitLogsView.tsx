@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import { Patient, VisitLog } from "../types";
 import { Button } from "../../../ui/components/elements/Button";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { TableModule, Column } from "../../../ui/components/common/TableModule";
 import { Card } from "../../../ui/components/common/Card";
 import { Badge } from "../../../ui/components/elements/Badge";
@@ -14,6 +15,16 @@ interface PatientVisitLogsViewProps {
 }
 
 export function PatientVisitLogsView({ patient, logs, onBack, onViewLog }: PatientVisitLogsViewProps) {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [logs.length]);
+
+  const totalPages = Math.ceil(logs.length / PAGE_SIZE) || 1;
+  const paginatedLogs = logs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return "-";
     const today = new Date();
@@ -170,14 +181,44 @@ export function PatientVisitLogsView({ patient, logs, onBack, onViewLog }: Patie
         </div>
       </div>
 
-      <Card className="border-none shadow-none overflow-hidden">
+      <Card className="border-none shadow-none overflow-hidden space-y-[1rem]">
         {logs.length > 0 ? (
-          <TableModule 
-            data={logs}
-            columns={columns}
-            keyExtractor={(l) => l.id}
-            onRowClick={onViewLog}
-          />
+          <>
+            <TableModule 
+              data={paginatedLogs}
+              columns={columns}
+              keyExtractor={(l) => l.id}
+              onRowClick={onViewLog}
+            />
+            <div className="flex items-center justify-between border-t border-gray-100 pt-[1rem] text-sm text-gray-600 px-[1rem]">
+              <div>
+                Menampilkan {(currentPage - 1) * PAGE_SIZE + 1} - {Math.min(currentPage * PAGE_SIZE, logs.length)} dari {logs.length} data
+              </div>
+              <div className="flex items-center gap-[0.5rem]">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className="p-[0.375rem]"
+                  title="Halaman Sebelumnya"
+                >
+                  <ChevronLeft className="h-[1.25rem] w-[1.25rem]" />
+                </Button>
+                <span className="font-medium px-[0.5rem]">Halaman {currentPage} dari {totalPages}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className="p-[0.375rem]"
+                  title="Halaman Selanjutnya"
+                >
+                  <ChevronRight className="h-[1.25rem] w-[1.25rem]" />
+                </Button>
+              </div>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center py-[5rem] text-gray-400">
             <FileText className="h-[4rem] w-[4rem] mb-[1rem] opacity-20" />

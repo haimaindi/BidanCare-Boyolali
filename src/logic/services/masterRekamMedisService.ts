@@ -367,6 +367,18 @@ export async function syncPatientFromRegistration(regData: {
   kabupaten?: string;
   kecamatan?: string;
   kelurahan?: string;
+  kk?: string;
+  noBpjs?: string;
+  provinsiLahir?: string;
+  tempatLahir?: string;
+  golDarah?: string;
+  namaSuamiIstri?: string;
+  nikSuami?: string;
+  noTelpSuami?: string;
+  namaOrangTua?: string;
+  nikOrangTua?: string;
+  noTelpOrangTua?: string;
+  catatanKhusus?: string;
 }): Promise<Patient> {
   const localCache = initPatientsCache();
 
@@ -394,6 +406,19 @@ export async function syncPatientFromRegistration(regData: {
     if (regData.kabupaten && regData.kabupaten !== existing.kabupaten) changes.kabupaten = regData.kabupaten;
     if (regData.kecamatan && regData.kecamatan !== existing.kecamatan) changes.kecamatan = regData.kecamatan;
     if (regData.kelurahan && regData.kelurahan !== existing.kelurahan) changes.kelurahan = regData.kelurahan;
+    if (regData.pekerjaan && regData.pekerjaan !== existing.pekerjaan) changes.pekerjaan = regData.pekerjaan;
+    if (regData.kk && regData.kk !== existing.kk) changes.kk = regData.kk;
+    if (regData.noBpjs && regData.noBpjs !== existing.noBpjs) changes.noBpjs = regData.noBpjs;
+    if (regData.provinsiLahir && regData.provinsiLahir !== existing.provinsiLahir) changes.provinsiLahir = regData.provinsiLahir;
+    if (regData.tempatLahir && regData.tempatLahir !== existing.tempatLahir) changes.tempatLahir = regData.tempatLahir;
+    if (regData.golDarah && regData.golDarah !== existing.golDarah) changes.golDarah = regData.golDarah;
+    if (regData.namaSuamiIstri && regData.namaSuamiIstri !== existing.namaSuamiIstri) changes.namaSuamiIstri = regData.namaSuamiIstri;
+    if (regData.nikSuami && regData.nikSuami !== existing.nikSuami) changes.nikSuami = regData.nikSuami;
+    if (regData.noTelpSuami && regData.noTelpSuami !== existing.noTelpSuami) changes.noTelpSuami = regData.noTelpSuami;
+    if (regData.namaOrangTua && regData.namaOrangTua !== existing.namaOrangTua) changes.namaOrangTua = regData.namaOrangTua;
+    if (regData.nikOrangTua && regData.nikOrangTua !== existing.nikOrangTua) changes.nikOrangTua = regData.nikOrangTua;
+    if (regData.noTelpOrangTua && regData.noTelpOrangTua !== existing.noTelpOrangTua) changes.noTelpOrangTua = regData.noTelpOrangTua;
+    if (regData.catatanKhusus && regData.catatanKhusus !== existing.catatanKhusus) changes.catatanKhusus = regData.catatanKhusus;
 
     if (Object.keys(changes).length > 0) {
       return await updatePatientItem(existing.id, changes);
@@ -418,6 +443,18 @@ export async function syncPatientFromRegistration(regData: {
     kabupaten: regData.kabupaten || '',
     kecamatan: regData.kecamatan || '',
     kelurahan: regData.kelurahan || '',
+    kk: regData.kk || '',
+    noBpjs: regData.noBpjs || '',
+    provinsiLahir: regData.provinsiLahir || '',
+    tempatLahir: regData.tempatLahir || '',
+    golDarah: regData.golDarah || '',
+    namaSuamiIstri: regData.namaSuamiIstri || '',
+    nikSuami: regData.nikSuami || '',
+    noTelpSuami: regData.noTelpSuami || '',
+    namaOrangTua: regData.namaOrangTua || '',
+    nikOrangTua: regData.nikOrangTua || '',
+    noTelpOrangTua: regData.noTelpOrangTua || '',
+    catatanKhusus: regData.catatanKhusus || '',
   });
 }
 

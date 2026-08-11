@@ -317,17 +317,10 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
     if (!isFormValid) return;
 
     await registerNewPatient({
-      nik: formData.nik,
-      noRm: formData.noRm,
+      ...formData,
       panggilan: formData.jenisPanggilan,
       nama: formData.namaPasien,
       jenisKelamin: (formData.jenisPanggilan === "Tn." || formData.jenisPanggilan === "Sdr." || formData.jenisPanggilan === "An.") ? "L" : "P",
-      tanggalLahir: formData.tanggalLahir,
-      alamat: formData.alamat,
-      noWhatsapp: formData.noWhatsapp,
-      puskesmas: formData.puskesmas,
-      jenisLayanan: formData.jenisLayanan,
-      pekerjaan: formData.pekerjaan,
       sumberPendaftaran: "Offline",
     });
 
@@ -338,17 +331,10 @@ export function PendaftaranForm({ onCancel, initialData }: PendaftaranFormProps)
     if (!isFormValid) return;
     
     const createdReg = await registerNewPatient({
-      nik: formData.nik,
-      noRm: formData.noRm,
+      ...formData,
       panggilan: formData.jenisPanggilan,
       nama: formData.namaPasien,
       jenisKelamin: (formData.jenisPanggilan === "Tn." || formData.jenisPanggilan === "Sdr." || formData.jenisPanggilan === "An.") ? "L" : "P",
-      tanggalLahir: formData.tanggalLahir,
-      alamat: formData.alamat,
-      noWhatsapp: formData.noWhatsapp,
-      puskesmas: formData.puskesmas,
-      jenisLayanan: formData.jenisLayanan,
-      pekerjaan: formData.pekerjaan,
       sumberPendaftaran: "Offline",
     });
 
